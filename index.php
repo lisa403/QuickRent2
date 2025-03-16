@@ -279,35 +279,36 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </div>
     </section>
         
-    <section id="reviews" class="reviews-section">
-        <div class="section-title">
-            <h2>Testimoni Pelanggan Kami💖</h2>
+ <section id="reviews" class="reviews-section">
+    <div class="section-title">
+        <h2>Testimoni Pelanggan Kami💖</h2>
+    </div>
+    <div class="reviews-container">
+        <div class="review-card">
+            <div class="rating">★★★★★</div>
+            <p class="review-text">Pelayanan sangat memuaskan, kendaraan bersih dan terawat. Proses pemesanan juga mudah dan cepat.</p>
+            <p class="reviewer">Timora L. <span>- Mahasiswa</span></p>
         </div>
-        <div class="reviews-container">
-            <div class="review-card">
-                <div class="rating">★★★★★</div>
-                <p class="review-text">Pelayanan sangat memuaskan, kendaraan bersih dan terawat. Proses pemesanan juga mudah dan cepat.</p>
-                <p class="reviewer">Timora L. <span>- Mahasiswa</span></p>
-            </div>
-            <div class="review-card">
-                <div class="rating">★★★★☆</div>
-                <p class="review-text">Mobil yang disewakan dalam kondisi prima, harga sewa juga terjangkau. Recommended!</p>
-                <p class="reviewer">Dalila N. <span>- Pengusaha</span></p>
-            </div>
+        <div class="review-card">
+            <div class="rating">★★★★☆</div>
+            <p class="review-text">Mobil yang disewakan dalam kondisi prima, harga sewa juga terjangkau. Recommended!</p>
+            <p class="reviewer">Dalila N. <span>- Pengusaha</span></p>
         </div>
-        <form class="review-form">
-            <h3>Berikan Ulasan Anda</h3>
-            <div class="rating-input">
-                <input type="radio" name="rating" value="5" id="star5"><label for="star5">★</label>
-                <input type="radio" name="rating" value="4" id="star4"><label for="star4">★</label>
-                <input type="radio" name="rating" value="3" id="star3"><label for="star3">★</label>
-                <input type="radio" name="rating" value="2" id="star2"><label for="star2">★</label>
-                <input type="radio" name="rating" value="1" id="star1"><label for="star1">★</label>
-            </div>
-            <textarea placeholder="Tulis ulasan Anda di sini"></textarea>
-            <button type="submit" class="form-submit">Kirim Ulasan</button>
-        </form>
-    </section>
+    </div>
+    <button onclick="toggleReviewForm()" class="review-button">Berikan Ulasan</button>
+    <form id="review-form" class="review-form" style="display: none;">
+        <h3>Berikan Ulasan Anda</h3>
+        <div class="rating-input">
+            <input type="radio" name="rating" value="5" id="star5"><label for="star5">★</label>
+            <input type="radio" name="rating" value="4" id="star4"><label for="star4">★</label>
+            <input type="radio" name="rating" value="3" id="star3"><label for="star3">★</label>
+            <input type="radio" name="rating" value="2" id="star2"><label for="star2">★</label>
+            <input type="radio" name="rating" value="1" id="star1"><label for="star1">★</label>
+        </div>
+        <textarea placeholder="Tulis ulasan Anda di sini"></textarea>
+        <button type="submit" class="form-submit">Kirim Ulasan</button>
+    </form>
+</section>
 
     <section id="login-section" class="auth-section">
         <div class="auth-container">
