@@ -1,128 +1,89 @@
 <?php
-require 'config.php'; // Menghubungkan ke database
-require 'functions.php'; // Menghubungkan ke fungsi yang diperlukan
+require 'config.php';
 
 $message = '';
-$errors = [];
+$id = $_GET['id'] ?? null;
 
-// Cek apakah ID pengguna ada di URL
-if (isset($_GET['id'])) {
-    $id = $_GET['id'];
-
-    // Ambil data pengguna berdasarkan ID
-    $stmt = $conn->prepare("SELECT * FROM users WHERE id = ?");
-    $stmt->bind_param("i", $id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    if ($result->num_rows > 0) {
-        $user = $result->fetch_assoc();
-    } else {
-        die("User  tidak ditemukan!");
-    }
+if (!$id) {
+    die("ID tidak ditemukan.");
 }
 
-// Proses data ketika form disubmit
+// Ambil data pemesanan berdasarkan ID
+$stmt = $pdo->prepare("SELECT * FROM pemesanan WHERE id = ?");
+$stmt->execute([$id]);
+$pemesanan = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if (!$pemesanan) {
+    die("Data tidak ditemukan.");
+}
+
+// Proses update jika form disubmit
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $name  = $_POST['name'];
-    $email = $_POST['email'];
-    $phone = $_POST['phone'];
+    $pengguna_id = $_POST['pengguna_id'];
+    $vehicle_id = $_POST['vehicle_id'];
+    $tanggal_penyewa = $_POST['tanggal_penyewa'];
+    $tanggal_dikembalikan = $_POST['tanggal_dikembalikan'];
+    $total_harga = $_POST['total_harga'];
+    $status = $_POST['status'];
 
-    // Validasi data
-    $errors = validateForm($name, $email, $phone);
+    $update = $pdo->prepare("UPDATE pemesanan SET 
+        pengguna_id = ?, 
+        vehicle_id = ?, 
+        tanggal_penyewa = ?, 
+        tanggal_dikembalikan = ?, 
+        total_harga = ?, 
+        status = ?
+        WHERE id = ?");
 
-    // Jika tidak ada error, simpan data ke database
-    if (empty($errors)) {
-        $stmt = $conn->prepare("UPDATE users SET name = ?, email = ?, phone = ? WHERE id = ?");
-        $stmt->bind_param("sssi", $name, $email, $phone, $id);
-
-        if ($stmt->execute()) {
-            $message = "<p style='color: green;'>Data berhasil diperbarui!</p>";
-        } else {
-            $message = "<p style='color: red;'>Gagal memperbarui data!</p>";
-        }
+    if ($update->execute([$pengguna_id, $vehicle_id, $tanggal_penyewa, $tanggal_dikembalikan, $total_harga, $status, $id])) {
+        $message = "Data berhasil diperbarui!";
+        // Refresh data dari database
+        $stmt->execute([$id]);
+        $pemesanan = $stmt->fetch(PDO::FETCH_ASSOC);
+    } else {
+        $message = "Terjadi kesalahan saat memperbarui data.";
     }
 }
 ?>
 
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Update User - QuickRent</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Update Pemesanan</title>
 </head>
 <body>
-    <header>
-        <nav class="navbar">
-            <div class="logo">
-                <h1>Quick<span>Rent</span></h1>
-            </div>
-            <ul class="nav-links">
-                <li><a href="index.php">Beranda</a></li>
-                <li><a href="#kami.php">Tentang Kami</a></li>
-                <li><a href="#">Ulasan</a></li>
-                <li><a href="#">Kontak</a></li>
-            </ul>
-        </nav>
-    </header>
+    <h1>Edit Pemesanan</h1>
+    <?php if ($message): ?>
+        <p><?= $message ?></p>
+    <?php endif; ?>
 
-    <main>
-        <section class="form-pemesanan">
-            <div class="form-container">
-                <h2>Update Data Pengguna</h2>
-                <?php echo $message; ?>
-                <form method="post" action="">
-                    <div class="input-group">
-                        <label for="name">Nama</label>
-                        <div class="input-field">
-                            <input type="text" name="name" placeholder="Masukkan Nama Anda" 
-                                value="<?php echo isset($user['name']) ? htmlspecialchars($user['name']) : ''; ?>"
-                                class="<?php echo isset($errors['name']) ? 'invalid' : ''; ?>">
-                        </div>
-                        <?php if (isset($errors['name'])) echo "<p class='error'>{$errors['name']}</p>"; ?>
-                    </div>
-                    <div class="input-group">
-                        <label for="email">Email</label>
-                        <div class="input-field">
-                            <input type="email" name="email" placeholder="Masukkan Email Anda" 
-                                value="<?php echo isset($user['email']) ? htmlspecialchars($user['email']) : ''; ?>"
-                                class="<?php echo isset($errors['email']) ? 'invalid' : ''; ?>">
-                        </div>
-                        <?php if (isset($errors['email'])) echo "<p class='error'>{$errors['email']}</p>"; ?>
-                    </div>
-                    <div class="input-group">
-                        <label for="phone">Nomor Telepon</label>
-                        <div class="input-field">
-                            <input type="text" name="phone" placeholder="Masukkan Nomor Telepon" 
-                                value="<?php echo isset($user['phone']) ? htmlspecialchars($user['phone']) : ''; ?>"
-                                class="<?php echo isset($errors['phone']) ? 'invalid' : ''; ?>">
-                        </div>
-                        <?php if (isset($errors['phone'])) echo "<p class='error'>{$errors['phone']}</p>"; ?>
-                    </div>
-                    <button type="submit" name="submit" class="submit-btn">💾 Simpan Perubahan</button>
-                </form>
-            </div>
-        </section>
-    </main>
+    <form method="POST">
+        <label>ID Pengguna:</label><br>
+        <input type="number" name="pengguna_id" value="<?= $pemesanan['pengguna_id'] ?>" required><br>
 
-    <footer>
-        <div class="footer-container">
-            <div class="footer-section">
-                <h3>QuickRent</h3>
-                <p>Kami melayani sewa sesuai dengan opsi kebutuhan Anda yaitu per 12 jam, 24 jam, harian, mingguan, dan bulanan.</p>
-            </div>
-            <div class="footer-section">
-                <h3>Kontak Kami</h3>
-                <p>Alamat: Jl. Kauman Lama No.26, Purwokerto Barat, Jawa Tengah</p>
-                <p>Telp: 0812-9283-9982</p>
-                <p>Email: vionasptrsduasa@quickrent.com</p>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>&copy; 2025 QuickRent. All rights reserved.</p>
-        </div>
-    </footer>
+        <label>ID Kendaraan:</label><br>
+        <input type="number" name="vehicle_id" value="<?= $pemesanan['vehicle_id'] ?>" required><br>
+
+        <label>Tanggal Sewa:</label><br>
+        <input type="date" name="tanggal_penyewa" value="<?= $pemesanan['tanggal_penyewa'] ?>" required><br>
+
+        <label>Tanggal Kembali:</label><br>
+        <input type="date" name="tanggal_dikembalikan" value="<?= $pemesanan['tanggal_dikembalikan'] ?>" required><br>
+
+        <label>Total Harga:</label><br>
+        <input type="number" name="total_harga" value="<?= $pemesanan['total_harga'] ?>" required><br>
+
+        <label>Status:</label><br>
+        <select name="status" required>
+            <option value="pending" <?= $pemesanan['status'] === 'pending' ? 'selected' : '' ?>>Pending</option>
+            <option value="confirmed" <?= $pemesanan['status'] === 'confirmed' ? 'selected' : '' ?>>Confirmed</option>
+            <option value="cancelled" <?= $pemesanan['status'] === 'cancelled' ? 'selected' : '' ?>>Cancelled</option>
+            <option value="completed" <?= $pemesanan['status'] === 'completed' ? 'selected' : '' ?>>Completed</option>
+        </select><br><br>
+
+        <button type="submit">Update</button>
+    </form>
+
+    <p><a href="index.php">← Kembali ke Daftar Pemesanan</a></p>
 </body>
 </html>
